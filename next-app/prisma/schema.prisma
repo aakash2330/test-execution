@@ -1,0 +1,19 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Submission {
+  id             Int     @id @default(autoincrement())
+  username       String
+  status         String
+  executionTime  String?
+  backendUrl     String
+  websocketUrl   String
+  submissionTime String
+}

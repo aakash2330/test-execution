@@ -20,39 +20,38 @@ import { useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { submissionformSchema } from "@/schema/submissionForm";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
 }
-
-const formSchema = z.object({
-  username: z.string().min(1).max(50),
-  backendEndpoint: z.string().min(1),
-  websocketEndpoint: z.string().min(1),
-});
 
 export function DataTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof submissionformSchema>>({
+    resolver: zodResolver(submissionformSchema),
     defaultValues: {
       username: "",
-      websocketEndpoint: "",
-      backendEndpoint: "",
+      websocketUrl: "",
+      backendUrl: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof submissionformSchema>) {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/redis`, {
+      method: "POST",
+      body: JSON.stringify({ values }),
+    });
+    const { success, message } = await res.json();
+    console.log({ success, message });
   }
 
   return (
@@ -105,7 +104,7 @@ export function DataTableToolbar<TData>({
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-8"
+                className="space-y-3"
               >
                 <FormField
                   control={form.control}
@@ -123,12 +122,12 @@ export function DataTableToolbar<TData>({
 
                 <FormField
                   control={form.control}
-                  name="backendEndpoint"
+                  name="backendUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm">Username</FormLabel>
+                      <FormLabel className="text-sm">backendEndpoint</FormLabel>
                       <FormControl>
-                        <Input placeholder="hkirat" {...field} />
+                        <Input placeholder="https://hkirat.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -137,12 +136,14 @@ export function DataTableToolbar<TData>({
 
                 <FormField
                   control={form.control}
-                  name="websocketEndpoint"
+                  name="websocketUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm">Username</FormLabel>
+                      <FormLabel className="text-sm">
+                        websocketEndpoint
+                      </FormLabel>
                       <FormControl>
-                        <Input placeholder="hkirat" {...field} />
+                        <Input placeholder="https://hkirat.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

@@ -53,15 +53,9 @@ async function pullFromQueue() {
       const item = data.element;
       console.log(`Worker ${process.pid} received item from queue:`, item);
       //add entry to db with progress pending
-      const { backendUrl, webSocketUrl } = JSON.parse(item);
-      console.log({ backendUrl, webSocketUrl });
+      const { backendUrl, websocketUrl } = JSON.parse(item);
       globalThis.backendUrl = backendUrl;
-      globalThis.webSocketUrl = webSocketUrl;
-      console.log(
-        globalThis.backendUrl,
-        globalThis.webSocketUrl,
-        "hello world",
-      );
+      globalThis.websocketUrl = websocketUrl;
 
       const testSuccessful = await runTests();
       //progress success / false with stastics
