@@ -31,8 +31,8 @@ export async function POST(request: NextRequest) {
     let reply: number = -1;
 
     // Add entry to DB using a transaction
-    await prisma.$transaction(async (tx) => {
-      await tx.submission.create({
+    await prisma.$transaction(async (tx: any) => {
+      const { id } = await tx.submission.create({
         data: {
           username,
           backendUrl,
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       // Add the submission data to Redis
       reply = await redisClient.lPush(
         "submissions",
-        JSON.stringify({ backendUrl, websocketUrl }),
+        JSON.stringify({ id, backendUrl, websocketUrl }),
       );
       console.log("Submission added to Redis queue");
     });

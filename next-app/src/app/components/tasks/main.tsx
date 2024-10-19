@@ -14,9 +14,6 @@ export const revalidate = 1;
 
 export default async function TaskPage() {
   const data = await fetchAllSubmissions();
-  if (_.isEmpty(data)) {
-    return <div>No data found</div>;
-  }
   return (
     <>
       <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
@@ -27,7 +24,10 @@ export default async function TaskPage() {
             </h2>
           </div>
         </div>
-        <DataTable data={data.submissions} columns={columns} />
+        <DataTable
+          data={_.isEmpty(data) ? [] : data.submissions}
+          columns={columns}
+        />
       </div>
     </>
   );

@@ -4,24 +4,13 @@ services:
     ports:
       - "6379:6379"
 
-  postgres:
-    image: postgres:latest
-    environment:
-      POSTGRES_USER: yourusername
-      POSTGRES_PASSWORD: yourpassword
-      POSTGRES_DB: yourdatabase
-    ports:
-      - "5432:5432"
-
-  express:
+  next:
     build:
-      context: ./express-app
+      context: ./next-app
     depends_on:
       - redis
-      - postgres
     environment:
       REDIS_HOST: redis
-      POSTGRES_HOST: postgres
       PORT: 3000
     ports:
       - "3000:3000"
@@ -31,11 +20,9 @@ services:
       context: ./worker
     depends_on:
       - redis
-      - express
-      - postgres
     environment:
       REDIS_HOST: redis
-      POSTGRES_HOST: postgres
+      NEXT_APP_URL: http://next:3000
     networks:
       - default
 

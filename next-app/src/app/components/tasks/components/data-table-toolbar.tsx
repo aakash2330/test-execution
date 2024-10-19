@@ -26,6 +26,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { submissionformSchema } from "@/schema/submissionForm";
+import { clearCache } from "@/actions/clearCache";
+import { DialogClose } from "@radix-ui/react-dialog";
+import { fr } from "@faker-js/faker";
+import { useToast } from "@/hooks/use-toast";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -34,6 +38,7 @@ interface DataTableToolbarProps<TData> {
 export function DataTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
+  const { toast } = useToast();
   const isFiltered = table.getState().columnFilters.length > 0;
 
   const form = useForm<z.infer<typeof submissionformSchema>>({
@@ -51,7 +56,19 @@ export function DataTableToolbar<TData>({
       body: JSON.stringify({ values }),
     });
     const { success, message } = await res.json();
-    console.log({ success, message });
+    clearCache();
+    document.getElementById("dialogClose")?.click();
+    if (success) {
+      toast({
+        description: message,
+        variant: "success",
+      });
+    } else {
+      toast({
+        description: message,
+        variant: "destructive",
+      });
+    }
   }
 
   return (
@@ -149,10 +166,13 @@ export function DataTableToolbar<TData>({
                     </FormItem>
                   )}
                 />
-                <Button type="submit">Submit</Button>
+                <Button disabled={form.formState.isSubmitting} type="submit">
+                  Submit
+                </Button>
               </form>
             </Form>
           </DialogHeader>
+          <DialogClose hidden id="dialogClose"></DialogClose>
         </DialogContent>
       </Dialog>
     </div>
