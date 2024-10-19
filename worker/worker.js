@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const redisHost = process.env.REDIS_HOST || "localhost";
-const nextAppUrl = process.env.NEXT_APP_URL || "http://localhost:3001";
+const nextAppUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3001";
 
 const redisClient = createClient({
   url: `redis://${redisHost}:6379`,
