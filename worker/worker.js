@@ -25,18 +25,17 @@ const queueName = "submissions";
 
 async function runTests(id) {
   try {
-    // Define Jest configuration options
     const jestConfig = {
       projects: [__dirname],
       silent: true,
     };
 
     const { results } = await jest.runCLI(jestConfig, [__dirname]);
-
-    const executionTime = (
-      results.testResults[0].perfStats.end -
-      results.testResults[0].perfStats.start
-    ).toString();
+    const executionTime = results.testResults
+      .reduce((a, c) => {
+        return a + (c.perfStats.end - c.perfStats.start);
+      }, 0)
+      .toString();
 
     if (results.success) {
       //progress success / false with stastics
