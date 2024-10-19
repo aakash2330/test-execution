@@ -11,9 +11,10 @@ services:
       - redis
     environment:
       REDIS_HOST: redis
-      PORT: 3000
+      PORT: 3001
+      NEXT_APP_URL: http://next:3001
     ports:
-      - "3000:3000"
+      - "3001:3001"
 
   worker:
     build:
@@ -22,7 +23,7 @@ services:
       - redis
     environment:
       REDIS_HOST: redis
-      NEXT_APP_URL: http://next:3000
+      NEXT_APP_URL: http://next:3001
     networks:
       - default
 

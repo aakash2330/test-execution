@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const redisHost = process.env.REDIS_HOST || "localhost";
-const nextAppUrl = process.env.NEXT_APP_URL || "http://localhost:3000";
+const nextAppUrl = process.env.NEXT_APP_URL || "http://localhost:3001";
 
 const redisClient = createClient({
   url: `redis://${redisHost}:6379`,
@@ -41,7 +41,7 @@ async function runTests(id) {
       //progress success / false with stastics
       const status = "done";
 
-      fetch("http://localhost:3000/api/submission", {
+      fetch(`${nextAppUrl}/api/submission`, {
         method: "POST",
         body: JSON.stringify({ values: { id, executionTime, status } }),
       });
@@ -53,7 +53,7 @@ async function runTests(id) {
 
       console.log({ id, executionTime, status });
 
-      fetch("http://localhost:3000/api/submission", {
+      fetch(`${nextAppUrl}/api/submission`, {
         method: "POST",
         body: JSON.stringify({ values: { id, executionTime, status } }),
       });
@@ -63,7 +63,7 @@ async function runTests(id) {
 
     const status = "failed";
 
-    fetch("http://localhost:3000/api/submission", {
+    fetch(`${nextAppUrl}/api/submission`, {
       method: "POST",
       body: JSON.stringify({ values: { id, executionTime: "-1", status } }),
     });
