@@ -2,6 +2,7 @@ import { createClient } from "redis";
 import jest from "jest";
 import { dirname } from "node:path"; // Use node: prefix for built-in modules
 import { fileURLToPath } from "node:url";
+import "dotenv/config";
 
 // Manual definition of __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
