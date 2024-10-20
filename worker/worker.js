@@ -27,7 +27,7 @@ async function runTests(id) {
   try {
     const jestConfig = {
       projects: [__dirname],
-      silent: true,
+      silent: false,
     };
 
     const { results } = await jest.runCLI(jestConfig, [__dirname]);

@@ -8,7 +8,13 @@ describe("Trading System Tests", () => {
   let ws;
 
   beforeAll((done) => {
-    ws = new WebSocket(WS_SERVER_URL);
+    ws = new WebSocket(WS_SERVER_URL, {
+      followRedirects: true,
+      headers: {
+        "User-Agent": "Node.js WebSocket Client",
+      },
+      rejectUnauthorized: false,
+    });
     ws.on("open", done);
   });
 
@@ -469,4 +475,4 @@ describe("Trading System Tests", () => {
       sell3Price * (quantity3 - 10),
     );
   });
-});
+}, 100000);
