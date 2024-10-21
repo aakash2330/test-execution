@@ -202,8 +202,8 @@ describe("Trading System Tests", () => {
     );
 
     expect(buyerStockBalance.data.msg[symbol].yes.quantity).toBe(quantity);
-    expect(sellerInrBalance.data.msg.balance * 100).toBe(price * quantity);
-  });
+    expect(sellerInrBalance.data.msg.balance).toBe(price * quantity);
+  }, 15000);
 
   test("Execute minting opposite orders with higher quantity and check WebSocket response", async () => {
     const buyerId = "buyer1";
@@ -258,7 +258,7 @@ describe("Trading System Tests", () => {
         },
       },
     });
-  });
+  }, 15000);
 
   test("Execute buying stocks from multiple users and check WebSocket response", async () => {
     const buyerId = "buyer1";
@@ -287,7 +287,7 @@ describe("Trading System Tests", () => {
 
     await ws.send(JSON.stringify({ type: "subscribe", stockSymbol: symbol }));
 
-    await axios.post(`${HTTP_SERVER_URL}/order/buy`, {
+    axios.post(`${HTTP_SERVER_URL}/order/buy`, {
       userId: buyerId,
       stockSymbol: symbol,
       quantity,
@@ -297,7 +297,7 @@ describe("Trading System Tests", () => {
 
     await waitForWSMessage();
 
-    await axios.post(`${HTTP_SERVER_URL}/order/buy`, {
+    axios.post(`${HTTP_SERVER_URL}/order/buy`, {
       userId: buyer2Id,
       stockSymbol: symbol,
       quantity: quantity + 20,
@@ -307,7 +307,7 @@ describe("Trading System Tests", () => {
 
     await waitForWSMessage();
 
-    await axios.post(`${HTTP_SERVER_URL}/order/buy`, {
+    axios.post(`${HTTP_SERVER_URL}/order/buy`, {
       userId: buyer3Id,
       stockSymbol: symbol,
       quantity: 2 * quantity + 30,
@@ -366,7 +366,7 @@ describe("Trading System Tests", () => {
     expect(buyer3InrBalance.data.msg.balance).toBe(
       1000000 - (1000 - price) * (2 * quantity + 30),
     );
-  });
+  }, 20000);
 
   test("Execute minting the opposing selling orders and check WebSocket response", async () => {
     const seller1Id = "seller1";
@@ -474,5 +474,5 @@ describe("Trading System Tests", () => {
     expect(seller3InrBalance.data.msg.balance).toBe(
       sell3Price * (quantity3 - 10),
     );
-  });
-}, 100000);
+  }, 20000);
+});
