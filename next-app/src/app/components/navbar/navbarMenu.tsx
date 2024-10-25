@@ -10,7 +10,6 @@ import { Role } from "@prisma/client";
 
 export function NavbarMenu({ session }: { session: Session | null }) {
   const path = usePathname();
-  console.log({ session });
   return (
     <div
       className={cn(

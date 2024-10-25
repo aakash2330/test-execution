@@ -142,16 +142,35 @@ export function DataTable<TData, TValue>({
                           }
                         >
                           <CollapsibleTrigger asChild>
-                            <div
-                              className={cn(
-                                `hover:cursor-pointer text-center transform transition-transform duration-300 ${
-                                  openRows.includes(row.id)
-                                    ? "rotate-90"
-                                    : "rotate-0"
-                                }`,
-                              )}
-                            >
-                              ▶
+                            <div>
+                              <div className="flex justify-center items-center">
+                                <div>
+                                  {
+                                    //@ts-ignore
+                                    data[row.id].results.reduce((a, c) => {
+                                      return c.status == "passed" ? a + 1 : a;
+                                    }, 0)
+                                  }
+                                </div>
+                                /
+                                <div>
+                                  {
+                                    //@ts-ignore
+                                    data[row.id].results.length
+                                  }
+                                </div>
+                              </div>
+                              <div
+                                className={cn(
+                                  `hover:cursor-pointer text-center transform transition-transform duration-300 ${
+                                    openRows.includes(row.id)
+                                      ? "rotate-90"
+                                      : "rotate-0"
+                                  }`,
+                                )}
+                              >
+                                ▶
+                              </div>
                             </div>
                           </CollapsibleTrigger>
                         </TableCell>

@@ -44,7 +44,7 @@ export function PlaygroundPage({
     resolver: zodResolver(submissionformSchema),
     defaultValues: {
       websocketUrl: "",
-      challengeId:challenge.id,
+      challengeId: challenge.id,
       backendUrl: "",
       challengeName: challenge.name,
     },
@@ -147,7 +147,7 @@ export function PlaygroundPage({
               </div>
             </div>
           </Tabs>
-          <div className="flex justify-center p-16 items-center col-span-3">
+          <div className="flex justify-center p-16  col-span-3">
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
