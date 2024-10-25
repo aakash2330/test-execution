@@ -23,14 +23,19 @@ redisClient.on("error", (err) => {
 
 const queueName = "submissions";
 
-async function runTests(id) {
+async function runTests(id, challengeName) {
   try {
     const jestConfig = {
       projects: [__dirname],
       silent: false,
     };
 
-    const { results } = await jest.runCLI(jestConfig, [__dirname]);
+    //TODO: also check if the test is available or not so the worker doesn't crash
+    const filePath = `./tests/${challengeName}.test.js`;
+
+    const { results } = await jest.runCLI({ ...jestConfig, _: [filePath] }, [
+      __dirname,
+    ]);
     const executionTime = results.testResults
       .reduce((a, c) => {
         return a + (c.perfStats.end - c.perfStats.start);
@@ -38,24 +43,44 @@ async function runTests(id) {
       .toString();
 
     if (results.success) {
-      //progress success / false with stastics
-      const status = "done";
-
+      let perTestResults = [];
+      results.testResults[0].testResults.forEach(
+        ({ title, status, duration }) => {
+          perTestResults.push({ title, status, duration });
+        },
+      );
       fetch(`${nextAppUrl}/api/submission`, {
         method: "POST",
-        body: JSON.stringify({ values: { id, executionTime, status } }),
+        body: JSON.stringify({
+          values: { id, executionTime, status: "done", perTestResults },
+        }),
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer J6o3GGPtq1Jf3Ai6k/RcNUUyqJiPVvq6Qq6SBPnJ8l4=`,
+        },
       });
     } else {
       console.log(
         `Tests failed. Number of failed tests: ${results.numFailedTests}`,
       );
-      const status = "failed";
-
-      console.log({ id, executionTime, status });
+      let perTestResults = [];
+      results.testResults[0].testResults.forEach(
+        ({ title, status, duration }) => {
+          perTestResults.push({ title, status, duration });
+        },
+      );
+      console.log("_______________________________");
+      console.log({ perTestResults });
 
       fetch(`${nextAppUrl}/api/submission`, {
         method: "POST",
-        body: JSON.stringify({ values: { id, executionTime, status } }),
+        body: JSON.stringify({
+          values: { id, executionTime, status: "failed", perTestResults },
+        }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer J6o3GGPtq1Jf3Ai6k/RcNUUyqJiPVvq6Qq6SBPnJ8l4=`,
+        },
       });
     }
   } catch (error) {
@@ -71,24 +96,23 @@ async function runTests(id) {
 }
 
 async function pullFromQueue() {
-  try {
-    const data = await redisClient.brPop(queueName, 0);
+  for (;;) {
+    try {
+      const data = await redisClient.brPop(queueName, 0);
+      if (data) {
+        const item = data.element;
+        console.log(`Worker ${process.pid} received item from queue:`, item);
 
-    if (data) {
-      const item = data.element;
-      console.log(`Worker ${process.pid} received item from queue:`, item);
-      //add entry to db with progress pending
-      const { id, backendUrl, websocketUrl } = JSON.parse(item);
-      globalThis.backendUrl = backendUrl;
-      globalThis.websocketUrl = websocketUrl;
-      globalThis.id = id;
-
-      await runTests(id);
+        const { id, backendUrl, websocketUrl, challengeName } =
+          JSON.parse(item);
+        globalThis.backendUrl = backendUrl;
+        globalThis.websocketUrl = websocketUrl;
+        await runTests(id, challengeName);
+      }
+    } catch (err) {
+      console.error("Error pulling from queue:", err);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
-    pullFromQueue();
-  } catch (err) {
-    console.error("Error pulling from queue:", err);
-    setTimeout(pullFromQueue, 1000);
   }
 }
 

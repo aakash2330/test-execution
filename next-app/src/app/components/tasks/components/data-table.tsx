@@ -27,7 +27,14 @@ import {
 
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableToolbar } from "./data-table-toolbar";
-import { submissionFaker } from "../data/seed";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { TperTestResults } from "@/schema/submissionResult";
+import _ from "lodash";
+import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -68,11 +75,12 @@ export function DataTable<TData, TValue>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
+  const [openRows, setOpenRows] = React.useState<string[]>([]);
   return (
     <div className="space-y-4">
       <DataTableToolbar table={table} />
       <div className="rounded-md border">
-        <Table>
+        <Table className="overflow-x-auto">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -93,25 +101,120 @@ export function DataTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table.getRowModel().rows.map((row) => {
+                return (
+                  <Collapsible
+                    key={row.id}
+                    onOpenChange={(value) => {
+                      if (value) {
+                        setOpenRows((prev) => {
+                          return [...prev, row.id];
+                        });
+                      } else {
+                        setOpenRows((prev) => {
+                          const updatedRows = [...prev];
+                          const indexNumber = updatedRows.findIndex((item) => {
+                            return item == row.id;
+                          });
+                          if (indexNumber != -1) {
+                            updatedRows.splice(indexNumber, 1);
+                          }
+                          return updatedRows;
+                        });
+                      }
+                    }}
+                    asChild
+                  >
+                    <>
+                      <TableRow>
+                        {row.getVisibleCells().map((cell, index) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </TableCell>
+                        ))}
+                        <TableCell
+                          hidden={
+                            //@ts-ignore
+                            _.isEmpty(data[row.id].results)
+                          }
+                        >
+                          <CollapsibleTrigger asChild>
+                            <div
+                              className={cn(
+                                `hover:cursor-pointer text-center transform transition-transform duration-300 ${
+                                  openRows.includes(row.id)
+                                    ? "rotate-90"
+                                    : "rotate-0"
+                                }`,
+                              )}
+                            >
+                              ▶
+                            </div>
+                          </CollapsibleTrigger>
+                        </TableCell>
+                      </TableRow>
+                      <CollapsibleContent asChild>
+                        <TableRow>
+                          <TableCell
+                            colSpan={row.getVisibleCells().length}
+                            className="p-4"
+                          >
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead className="text-center">
+                                    Title
+                                  </TableHead>
+                                  <TableHead className="text-center">
+                                    Status
+                                  </TableHead>
+                                  <TableHead className="text-center">
+                                    Duration
+                                  </TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {
+                                  //@ts-ignore
+                                  data[row.id].results
+                                    ? //@ts-ignore
+                                      data[row.id].results.map(
+                                        (d: TperTestResults, index: number) => {
+                                          return (
+                                            <TableRow key={index}>
+                                              <TableCell className="font-medium">
+                                                {d.title}
+                                              </TableCell>
+
+                                              <TableCell className="font-medium text-center">
+                                                {d.status}
+                                              </TableCell>
+
+                                              <TableCell className="font-medium text-center">
+                                                {d.duration}
+                                              </TableCell>
+                                            </TableRow>
+                                          );
+                                        },
+                                      )
+                                    : "Running Tests..."
+                                }
+                              </TableBody>
+                            </Table>
+                          </TableCell>
+                        </TableRow>
+                      </CollapsibleContent>
+                    </>
+                  </Collapsible>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={table.getAllColumns().length}
                   className="h-24 text-center"
                 >
                   No results.

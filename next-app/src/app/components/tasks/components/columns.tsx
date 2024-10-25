@@ -3,30 +3,30 @@
 import { ColumnDef } from "@tanstack/react-table";
 
 import { statuses } from "../data/data";
-import { Task } from "../data/schema";
 import { DataTableColumnHeader } from "./data-table-column-header";
-import { Badge } from "@/components/ui/badge";
+import { TSubmissionWithUserAndResults } from "../../../../../types/submission";
 
-export const columns: ColumnDef<Task>[] = [
+export const columns: ColumnDef<TSubmissionWithUserAndResults>[] = [
   {
     accessorKey: "id",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="submission" />
     ),
-    cell: ({ row }) => <div className="w-[80px]">{row.getValue("id")}</div>,
+    cell: ({ row }) => <div className="w-fit">{row.getValue("id")}</div>,
     enableSorting: false,
     enableHiding: false,
   },
   {
-    accessorKey: "username",
+    id: "name",
+    accessorFn: (row) => row.user.name,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="username" />
+      <DataTableColumnHeader column={column} title="name" />
     ),
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
           <span className="max-w-[500px] truncate font-medium">
-            {row.getValue("username")}
+            {row.getValue("name")}
           </span>
         </div>
       );

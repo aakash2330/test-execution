@@ -2,7 +2,6 @@ import { Metadata } from "next";
 import Image from "next/image";
 import { columns } from "./components/columns";
 import { DataTable } from "./components/data-table";
-import { fetchAllSubmissions } from "@/actions/submissions.action";
 import _ from "lodash";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
 import { ScrollInViewComponent } from "@/components/scrollInViewButton";
@@ -15,7 +14,6 @@ export const metadata: Metadata = {
 export const revalidate = 1;
 
 export default async function TaskPage() {
-  const data = await fetchAllSubmissions();
   return (
     <>
       <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
@@ -32,10 +30,6 @@ export default async function TaskPage() {
             </ScrollInViewComponent>
           </div>
         </div>
-        <DataTable
-          data={_.isEmpty(data) ? [] : data.submissions}
-          columns={columns}
-        />
       </div>
     </>
   );

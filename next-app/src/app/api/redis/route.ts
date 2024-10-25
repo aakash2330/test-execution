@@ -1,3 +1,4 @@
+import { getServerAuthSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { submissionformSchema } from "@/schema/submissionForm";
 import { NextRequest, NextResponse } from "next/server";
@@ -14,6 +15,11 @@ redisClient.on("error", (err) => {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerAuthSession();
+    if (!session) {
+      throw new Error("NO USER");
+    }
+
     // Connect Redis client once outside the transaction
     if (!redisClient.isOpen) {
       await redisClient.connect();
@@ -26,33 +32,39 @@ export async function POST(request: NextRequest) {
     }
 
     // Get the username, backendUrl, and websocketUrl from the body
-    const { username, backendUrl, websocketUrl } = parsedValues.data;
+    const { backendUrl, websocketUrl, challengeName, challengeId } =
+      parsedValues.data;
 
     let reply: number = -1;
-
+    let submissionId = "-1";
     // Add entry to DB using a transaction
     await prisma.$transaction(async (tx: any) => {
       const { id } = await tx.submission.create({
         data: {
-          username,
+          userId: session.user.id,
           backendUrl,
           websocketUrl,
           status: "in progress",
           submissionTime: Date.now().toString(),
+          challengeId,
         },
       });
 
       // Add the submission data to Redis
       reply = await redisClient.lPush(
         "submissions",
-        JSON.stringify({ id, backendUrl, websocketUrl }),
+        JSON.stringify({ id, backendUrl, websocketUrl, challengeName }),
       );
-      console.log("Submission added to Redis queue");
+      console.log(
+        `Submission added to Redis queue for the challenge ${challengeName}`,
+      );
+
+      submissionId = id;
     });
 
     return NextResponse.json({
       success: true,
-      message: `Your Submission has been added to queue (${reply})`,
+      message: { submissionId },
     });
   } catch (error) {
     console.error("Error:", error);
