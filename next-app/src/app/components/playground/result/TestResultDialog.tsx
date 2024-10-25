@@ -86,9 +86,9 @@ export function TestResultDialog({
               </TableHeader>
               <TableBody>
                 {data
-                  ? data.map((d: TperTestResults) => {
+                  ? data.map((d: TperTestResults, index: number) => {
                       return (
-                        <TableRow>
+                        <TableRow key={index}>
                           <TableCell className="font-medium">
                             {d.title}
                           </TableCell>

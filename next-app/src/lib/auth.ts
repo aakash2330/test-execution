@@ -1,9 +1,21 @@
-import { NextAuthOptions, getServerSession } from "next-auth";
+import { DefaultSession, NextAuthOptions, getServerSession } from "next-auth";
 import GoogleProvider, { type GoogleProfile } from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "./prisma";
+import { Role } from "@prisma/client";
 
-export const authOptions = {
+declare module "next-auth" {
+  interface Session extends DefaultSession {
+    user: {
+      id: string;
+      role: Role;
+    } & DefaultSession["user"];
+  }
+  interface User {
+    role: Role;
+  }
+}
+export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/login",
     signOut: "/",
@@ -12,40 +24,51 @@ export const authOptions = {
     strategy: "jwt",
   },
   adapter: PrismaAdapter(prisma),
-  secret: "asdasdsdasd",
+  secret: process.env.NEXT_AUTH_SECRET,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
       allowDangerousEmailAccountLinking: true,
-
-      profile(profile: GoogleProfile, token) {
-        console.log({
-          id: profile.sub,
-          name: `${profile.given_name}`,
-          email: profile.email,
-          emailVerified: true,
-        });
+      profile(profile: GoogleProfile) {
         return {
           id: profile.sub,
           name: `${profile.given_name}`,
           email: profile.email,
           emailVerified: true,
+          role: Role.USER,
         };
       },
     }),
   ],
   callbacks: {
-    jwt({ token, user, trigger, session }) {
-      if (trigger === "update") {
+    async jwt({ token, user, trigger, session }) {
+      if (trigger === "update" && session?.user) {
         return {
           ...token,
           ...session.user,
         };
       }
       if (user) {
-        token.id = user.id;
-        token.name = user.name;
+        if (user.email) {
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email },
+          });
+          if (!existingUser) {
+            await prisma.user.update({
+              where: { email: user.email },
+              data: {
+                role: Role.USER,
+              },
+            });
+          }
+        }
+        return {
+          ...token,
+          id: user.id,
+          name: user.name,
+          role: Role.USER,
+        };
       }
       return token;
     },
@@ -55,10 +78,11 @@ export const authOptions = {
         user: {
           ...session.user,
           id: token.id,
+          role: token.role,
         },
       };
     },
   },
-} satisfies NextAuthOptions;
+};
 
 export const getServerAuthSession = () => getServerSession(authOptions);

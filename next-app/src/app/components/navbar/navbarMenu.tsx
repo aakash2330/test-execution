@@ -18,20 +18,27 @@ export function NavbarMenu({ session }: { session: Session | null }) {
       <div className="flex gap-5">
         <NavbarMenuItem href={"/"} title="100x Challenges"></NavbarMenuItem>
       </div>
-      {session?.user ? (
-        <Button
-          onClick={async () => {
-            await signOut();
-          }}
-          className="bg-neutral-700"
-        >
-          Logout
-        </Button>
-      ) : (
-        <Button className="bg-neutral-700">
-          <Link href={"/api/auth/signin"}>Login</Link>
-        </Button>
-      )}
+      <div className="space-x-4">
+        {session?.user.role && (
+          <Button className="bg-neutral-700">
+            <Link href={"/admin/challenge/create"}>Create Challenge</Link>
+          </Button>
+        )}
+        {session?.user ? (
+          <Button
+            onClick={async () => {
+              await signOut();
+            }}
+            className="bg-neutral-700"
+          >
+            Logout
+          </Button>
+        ) : (
+          <Button className="bg-neutral-700">
+            <Link href={"/api/auth/signin"}>Login</Link>
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

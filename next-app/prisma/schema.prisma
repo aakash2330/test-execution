@@ -53,6 +53,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   submissions   Submission[]
+  role          Role         @default(USER)
 }
 
 model VerificationToken {
@@ -84,4 +85,9 @@ model Results {
   duration     Int
   submissionId String
   submission   Submission @relation(fields: [submissionId], references: [id])
+}
+
+enum Role {
+  USER
+  ADMIN
 }
