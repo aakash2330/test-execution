@@ -6,9 +6,11 @@ import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Role } from "@prisma/client";
 
 export function NavbarMenu({ session }: { session: Session | null }) {
   const path = usePathname();
+  console.log({ session });
   return (
     <div
       className={cn(
@@ -19,7 +21,7 @@ export function NavbarMenu({ session }: { session: Session | null }) {
         <NavbarMenuItem href={"/"} title="100x Challenges"></NavbarMenuItem>
       </div>
       <div className="space-x-4">
-        {session?.user.role && (
+        {session?.user.role === Role.ADMIN && (
           <Button className="bg-neutral-700">
             <Link href={"/admin/challenge/create"}>Create Challenge</Link>
           </Button>

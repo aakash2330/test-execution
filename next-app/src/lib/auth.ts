@@ -15,6 +15,7 @@ declare module "next-auth" {
     role: Role;
   }
 }
+
 export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/login",
@@ -49,26 +50,29 @@ export const authOptions: NextAuthOptions = {
           ...session.user,
         };
       }
+
       if (user) {
         if (user.email) {
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email },
           });
+
           if (!existingUser) {
-            await prisma.user.update({
-              where: { email: user.email },
-              data: {
-                role: Role.USER,
-              },
-            });
+            return {
+              ...token,
+              id: user.id,
+              name: user.name,
+              role: Role.USER,
+            };
           }
+
+          return {
+            ...token,
+            id: user.id,
+            name: user.name,
+            role: existingUser.role,
+          };
         }
-        return {
-          ...token,
-          id: user.id,
-          name: user.name,
-          role: Role.USER,
-        };
       }
       return token;
     },
