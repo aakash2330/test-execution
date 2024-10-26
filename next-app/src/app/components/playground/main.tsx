@@ -84,12 +84,15 @@ export function PlaygroundPage({
         <Separator />
         <div className="grid grid-cols-12">
           <Tabs defaultValue="Documentation" className="col-span-9">
-            <TabsList className="grid w-full mt-6 grid-cols-3">
+            <TabsList className="grid w-full mt-6 grid-cols-4">
               <TabsTrigger value="Documentation">
                 <span>Documentation</span>
               </TabsTrigger>
               <TabsTrigger value="Api Specifications">
                 <span>Api Specifications</span>
+              </TabsTrigger>
+              <TabsTrigger value="ws-specifications">
+                <span>Web socket Specifications</span>
               </TabsTrigger>
               <TabsTrigger value="submissions">
                 <span>Submissions</span>
@@ -139,6 +142,21 @@ export function PlaygroundPage({
                             }
                             columns={columns}
                           />
+                        </ScrollArea>
+                      </Card>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent
+                    value="ws-specifications"
+                    className="mt-0 border-0 p-0"
+                  >
+                    <div className="flex h-full w-full flex-col space-y-4">
+                      <Card className="min-h overflow-scroll- y   flex-1 p-4 md:min-h-[700px] lg:min-h-[700px]">
+                        <ScrollArea>
+                          <SwaggerUIComponent
+                            challengeName={"probo.ws"}
+                          ></SwaggerUIComponent>
                         </ScrollArea>
                       </Card>
                     </div>

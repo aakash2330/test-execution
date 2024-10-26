@@ -1,15 +1,7 @@
 openapi: 3.0.0
 info:
   title: Probo API
-  description: API for creating users, symbols, managing orders, and balances in a trading system.
-servers:
-  - url: http://{serverHost}:{serverPort}
-    description: Trading System Server
-    variables:
-      serverHost:
-        default: localhost
-      serverPort:
-        default: 3000
+  description: API for creating users, symbols, managing orders, and balances in an opinions trading app.
 paths:
   /user/create/{userId}:
     post:
