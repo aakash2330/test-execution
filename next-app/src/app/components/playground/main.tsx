@@ -155,7 +155,7 @@ export function PlaygroundPage({
                       <Card className="min-h overflow-scroll- y   flex-1 p-4 md:min-h-[700px] lg:min-h-[700px]">
                         <ScrollArea>
                           <SwaggerUIComponent
-                            challengeName={"probo.ws"}
+                            challengeName={`${challenge.name}.ws`}
                           ></SwaggerUIComponent>
                         </ScrollArea>
                       </Card>
